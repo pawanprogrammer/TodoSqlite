@@ -25,4 +25,19 @@
         android:textSize="16sp"
         android:padding="5dp"
         android:textColor="#000"></TextView>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_delete"
+        android:id="@+id/iv_delete"
+        android:layout_gravity="center_horizontal"></ImageView>
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@android:drawable/ic_menu_edit"
+        android:id="@+id/iv_edit"
+        ></ImageView>
+
 </LinearLayout>

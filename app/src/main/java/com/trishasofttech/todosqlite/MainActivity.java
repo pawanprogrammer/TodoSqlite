@@ -13,7 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,11 +84,28 @@ List<MyData> list;
         }
 
         @Override
-        public void onBindViewHolder(@NonNull MyHolder holder, int position) {
-            MyData myData = list.get(position);
+        public void onBindViewHolder(@NonNull final MyHolder holder, final int position) {
+            final MyData myData = list.get(position);
             holder.tvtaskdesc.setText(myData.getTaskdesc());
             holder.tvtask.setText(myData.getTask());
             holder.tvname.setText(myData.getName());
+
+            holder.iv_delete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //Toast.makeText(MainActivity.this, String.valueOf(position), Toast.LENGTH_SHORT).show();
+                /*to delete the item from sqlite*/
+                    sd.execSQL("Delete from virutable where task = '"+myData.getTask()+"'");
+                }
+            });
+
+            holder.iv_edit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    /*to update the record*/
+                    sd.execSQL("Update virutable Set taskdesc = '"+ettaskdesc.getText().toString()+"' where task = '"+myData.getTask()+"' " );
+                }
+            });
         }
 
         @Override
@@ -97,11 +116,14 @@ List<MyData> list;
 
     private class MyHolder extends RecyclerView.ViewHolder{
         TextView tvname,tvtaskdesc,tvtask;
+        ImageView iv_delete, iv_edit;
         public MyHolder(@NonNull View itemView) {
             super(itemView);
             tvname = itemView.findViewById(R.id.tvname);
             tvtask = itemView.findViewById(R.id.tvtask);
             tvtaskdesc = itemView.findViewById(R.id.tvtaskdesc);
+            iv_delete = itemView.findViewById(R.id.iv_delete);
+            iv_edit = itemView.findViewById(R.id.iv_edit);
 
         }
     }
