@@ -2,6 +2,7 @@ package com.trishasofttech.todosqlite;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,12 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-RecyclerView recyclerView;
-EditText etname,ettask, ettaskdesc;
-Button btnsave;
-SQLiteDatabase sd;
-List<MyData> list;
+    RecyclerView recyclerView;
+    EditText etname, ettask, ettaskdesc;
+    Button btnsave;
+    SQLiteDatabase sd;
+    List<MyData> list;
     MyAdpater myAdapater;
+    CardView cardView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,7 +38,7 @@ List<MyData> list;
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         list = new ArrayList<>();
-         myAdapater= new MyAdpater();
+        myAdapater = new MyAdpater();
 
         etname = findViewById(R.id.etname);
         ettask = findViewById(R.id.ettask);
@@ -49,7 +52,7 @@ List<MyData> list;
             @Override
             public void onClick(View view) {
                 /*to insert the data into table*/
-                sd.execSQL("insert into virutable values('"+ettask.getText().toString()+"', '"+ettaskdesc.getText().toString()+"', '"+etname.getText().toString()+"')");
+                sd.execSQL("insert into virutable values('" + ettask.getText().toString() + "', '" + ettaskdesc.getText().toString() + "', '" + etname.getText().toString() + "')");
                 /*to clear the form*/
                 etname.setText("");
                 ettaskdesc.setText("");
@@ -58,6 +61,29 @@ List<MyData> list;
                 fetchdata();
             }
         });
+
+        btnsave.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                searchdata();
+                return true;
+            }
+        });
+    }
+
+    private void searchdata() {
+        /*to fetch and store the data into cursor class from sqlite database*/
+        Cursor cursor = sd.rawQuery("select * from virutable where task = '"+ettask.getText().toString()+"'",
+                null);
+        cursor.moveToFirst();
+        do {
+            //to pass the data record into the arraylist
+            list.add(new MyData(cursor.getString(0), cursor.getString(1), cursor.getString(2)));
+        }
+        while (cursor.moveToNext());
+        //list.add(new MyData(cursor.getString(0), cursor.getString(1), cursor.getString(2)));
+        recyclerView.setAdapter(myAdapater);
+
     }
 
     private void fetchdata() {
@@ -94,16 +120,37 @@ List<MyData> list;
                 @Override
                 public void onClick(View view) {
                     //Toast.makeText(MainActivity.this, String.valueOf(position), Toast.LENGTH_SHORT).show();
-                /*to delete the item from sqlite*/
-                    sd.execSQL("Delete from virutable where task = '"+myData.getTask()+"'");
+                    /*to delete the item from sqlite*/
+                    sd.execSQL("Delete from virutable where task = '" + myData.getTask() + "'");
+                    myAdapater.notifyDataSetChanged();
+                    list.clear();
+
+                    Cursor cursor = sd.rawQuery("select * from virutable", null);
+                    cursor.moveToFirst();
+                    do {
+                        /*to pass the data record into the arraylist*/
+                        list.add(new MyData(cursor.getString(0), cursor.getString(1), cursor.getString(2)));
+                    }
+                    while (cursor.moveToNext());
+
+                    recyclerView.setAdapter(myAdapater);
+
                 }
             });
 
-            holder.iv_edit.setOnClickListener(new View.OnClickListener() {
+            /*holder.iv_edit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    /*to update the record*/
-                    sd.execSQL("Update virutable Set taskdesc = '"+ettaskdesc.getText().toString()+"' where task = '"+myData.getTask()+"' " );
+                    *//*to update the record*//*
+                    sd.execSQL("Update virutable Set taskdesc = '" + ettaskdesc.getText().toString() + "' where task = '" + myData.getTask() + "' ");
+                }
+            });*/
+
+            holder.iv_edit.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    sd.execSQL("Update virutable Set taskdesc = '" + ettaskdesc.getText().toString() + "' where task = '" + myData.getTask() + "' ");
+                    return true;
                 }
             });
         }
@@ -114,9 +161,10 @@ List<MyData> list;
         }
     }
 
-    private class MyHolder extends RecyclerView.ViewHolder{
-        TextView tvname,tvtaskdesc,tvtask;
+    private class MyHolder extends RecyclerView.ViewHolder {
+        TextView tvname, tvtaskdesc, tvtask;
         ImageView iv_delete, iv_edit;
+
         public MyHolder(@NonNull View itemView) {
             super(itemView);
             tvname = itemView.findViewById(R.id.tvname);
